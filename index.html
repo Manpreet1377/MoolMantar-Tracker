@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Recitation Tracker</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+    th {
+      background: #f2f2f2;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🙏 Recitation Tracker</h1>
+  <h3>Goal: 1,25,000</h3>
+
+  <!-- ADD NAME ONCE -->
+  <input id="newName" placeholder="Enter your name (first time only)">
+  <button onclick="addName()">Add My Name</button>
+
+  <hr>
+
+  <!-- SELECT NAME -->
+  <select id="nameSelect">
+    <option value="">Select your name</option>
+  </select>
+
+  <input type="number" id="count" placeholder="Count for today">
+  <button onclick="addCount()">Submit Count</button>
+
+  <h2>Total Recited: <span id="total">0</span></h2>
+  <h2>Remaining: <span id="remaining">125000</span></h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Total Count</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <script>
+    const GOAL = 125000;
+
+    let data = JSON.parse(localStorage.getItem("recitations")) || {};
+    let members = JSON.parse(localStorage.getItem("members")) || [];
+
+    function save() {
+      localStorage.setItem("recitations", JSON.stringify(data));
+      localStorage.setItem("members", JSON.stringify(members));
+      render();
+    }
+
+    function addName() {
+      const name = document.getElementById("newName").value.trim();
+      if (!name) {
+        alert("Please enter a name");
+        return;
+      }
+      if (members.includes(name)) {
+        alert("Name already exists");
+        return;
+      }
+
+      members.push(name);
+      data[name] = 0;
+
+      document.getElementById("newName").value = "";
+      save();
+    }
+
+    function addCount() {
+      const name = document.getElementById("nameSelect").value;
+      const count = parseInt(document.getElementById("count").value);
+
+      if (!name || isNaN(count) || count <= 0) {
+        alert("Select name and enter valid count");
+        return;
+      }
+
+      data[name] += count;
+      document.getElementById("count").value = "";
+      save();
+    }
+
+    function render() {
+      const select = document.getElementById("nameSelect");
+      select.innerHTML = '<option value="">Select your name</option>';
+
+      members.forEach(name => {
+        select.innerHTML += `<option value="${name}">${name}</option>`;
+      });
+
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+      let total = 0;
+
+      members.forEach(name => {
+        total += data[name];
+        tbody.innerHTML += `<tr><td>${name}</td><td>${data[name]}</td></tr>`;
+      });
+
+      document.getElementById("total").textContent = total;
+      document.getElementById("remaining").textContent =
+        Math.max(GOAL - total, 0);
+    }
+
+    render();
+  </script>
+
+</body>
+</html>
